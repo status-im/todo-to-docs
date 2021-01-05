@@ -4,14 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"regexp"
+	"strings"
 	"unicode"
 
 	"github.com/davecgh/go-spew/spew"
 )
 
 // TODO implement dynamic comment token selection
-
-// TODO get any additional lines from the todo
 
 // TODO With line number find if todo is in a function or struct record the name of the function / struct in `todo{}`
 
@@ -23,6 +22,10 @@ const (
 var (
 	keywords = []string{"todo", "fixme"}
 	found []todo
+
+	// todoMode tracks if subsequent comment lines should be included in the last to-do's description
+	todoMode = false
+
 )
 
 type todo struct {
@@ -84,9 +87,25 @@ func processFilesInDir(dir string) error {
 
 			results := r.FindSubmatch([]byte(l))
 			if results == nil {
+				if len(l) < 3 {
+					todoMode = false
+				}
+
+				if todoMode {
+					l = strings.TrimSpace(l)
+					if l[:2] == "//" {
+						found[len(found)-1].Description += "\n" + l[2:]
+					} else {
+						todoMode = false
+					}
+				}
+
 				continue
 			}
 			found = append(found, todo{filepath, string(results[1]), i+1})
+			todoMode = true
+
+			// TODO Working on getting subsequent lines of a todo
 		}
 	}
 
