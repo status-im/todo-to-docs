@@ -16,21 +16,21 @@ import (
 
 const (
 	statusDir = "../status-go"
-	ignore = statusDir + "/vendor"
+	ignore    = statusDir + "/vendor"
 )
 
 var (
 	keywords = []string{"todo", "fixme"}
-	found []todo
+	found    []todo
 
 	// todoMode tracks if subsequent comment lines should be included in the last to-do's description
 	todoMode = false
 )
 
 type todo struct {
-	Filepath string
-	Description string
-	LineNumber int
+	Filepath          string
+	Description       string
+	LineNumber        int
 	RelatedFuncOrType string
 }
 
@@ -78,7 +78,7 @@ func processFilesInDir(dir string) error {
 			}
 		}
 
-		if !isGoFile(f.Name()){
+		if !isGoFile(f.Name()) {
 			continue
 		}
 
@@ -108,7 +108,7 @@ func processFilesInDir(dir string) error {
 
 				continue
 			}
-			found = append(found, todo{filepath, string(results[1]), i+1, et.Current()})
+			found = append(found, todo{filepath, string(results[1]), i + 1, et.Current()})
 			todoMode = true
 		}
 	}

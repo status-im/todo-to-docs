@@ -5,12 +5,12 @@ import (
 )
 
 type entityTracker struct {
-	entityDetector *regexp.Regexp
-	openBracketDetector *regexp.Regexp
+	entityDetector       *regexp.Regexp
+	openBracketDetector  *regexp.Regexp
 	closeBracketDetector *regexp.Regexp
 
 	currentEntity    string
-	lastEntity string
+	lastEntity       string
 	openBracketCount map[string]int
 }
 
@@ -31,10 +31,10 @@ func NewEntityTracker() (*entityTracker, error) {
 	}
 
 	return &entityTracker{
-		entityDetector: ed,
-		openBracketDetector: obd,
+		entityDetector:       ed,
+		openBracketDetector:  obd,
 		closeBracketDetector: cbd,
-		openBracketCount: map[string]int{},
+		openBracketCount:     map[string]int{},
 	}, nil
 }
 
