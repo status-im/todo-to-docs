@@ -11,9 +11,6 @@ import (
 
 // TODO implement dynamic comment token selection
 
-// TODO get line number of todo
-//  can be found by splitting the file by line break and regex find on each line.
-
 // TODO add line number to `todo` struct
 
 // TODO With line number find if todo is in a function or struct record the name of the function / struct in `todo{}`
@@ -31,6 +28,7 @@ var (
 type todo struct {
 	Filepath string
 	Description string
+	LineNumber int
 }
 
 func main() {
@@ -44,6 +42,11 @@ func main() {
 
 func processFilesInDir(dir string) error {
 	r, err := regexp.Compile(buildRegexPattern(keywords))
+	if err != nil {
+		return err
+	}
+
+	lineSplitter, err := regexp.Compile("[\n]")
 	if err != nil {
 		return err
 	}
@@ -76,15 +79,19 @@ func processFilesInDir(dir string) error {
 			return err
 		}
 
-		results := r.FindAllSubmatch(file, -1)
-		if results == nil {
-			continue
-		}
+		lines := lineSplitter.Split(string(file), -1)
+		for i, l := range lines {
 
-		for _, rst := range results {
-			found = append(found, todo{filepath, string(rst[1])})
-		}
+			results := r.FindAllSubmatch([]byte(l), -1)
+			if results == nil {
+				continue
+			}
 
+			for _, rst := range results {
+				found = append(found, todo{filepath, string(rst[1]), i+1})
+			}
+
+		}
 	}
 
 	return nil
@@ -100,7 +107,7 @@ func isGoFile(name string) bool {
 
 func buildRegexPattern(keywords []string) string {
 	kwp := makeRegexKeywords(keywords)
-	return fmt.Sprintf("//.*((%s)(.*))[\n,\n,\n\n,\n]", kwp)
+	return fmt.Sprintf("//.*((%s)(.*))", kwp)
 }
 
 func makeRegexKeywords(keywords []string) string {
