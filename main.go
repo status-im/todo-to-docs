@@ -12,9 +12,18 @@ const (
 	ignore = statusDir + "/vendor"
 )
 
+// TODO implement dynamic comment token selection
+// TODO implement dynamic todo phrase search generation
+//  ie generate regex string from a slice of keywords
+
 var (
-	found = map[string][]string{}
+	found []todo
 )
+
+type todo struct {
+	Filepath string
+	Description string
+}
 
 func main() {
 	err := processFilesInDir(statusDir)
@@ -26,7 +35,7 @@ func main() {
 }
 
 func processFilesInDir(dir string) error {
-	r, err := regexp.Compile("//.*([t,T][o,O][d,D][o,O]|[f,F][i,I][x,X][m,M][e,E])(.*)[\n,\r,\n\r,\r\n]")
+	r, err := regexp.Compile("//.*(([t,T][o,O][d,D][o,O]|[f,F][i,I][x,X][m,M][e,E])(.*))[\n,\r,\n\r,\r\n]")
 	if err != nil {
 		return err
 	}
@@ -64,12 +73,9 @@ func processFilesInDir(dir string) error {
 			continue
 		}
 
-		found[filepath] = []string{}
-
-		//spew.Dump(filepath, results)
 		for _, rst := range results {
 			spew.Dump(rst)
-			found[filepath] = append(found[filepath], string(rst[2]))
+			found = append(found, todo{filepath, string(rst[1])})
 		}
 
 	}
