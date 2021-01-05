@@ -10,9 +10,9 @@ import (
 	"github.com/davecgh/go-spew/spew"
 )
 
-// TODO implement dynamic comment token selection
+// TODO implement dynamic comment token selection, could maybe work similar to entityTracker{}
 
-// TODO With line number find if todo is in a function or struct record the name of the function / struct in `todo{}`
+// TODO check if to-do is just above a function or struct, if so assume the to-do is about the function
 
 const (
 	statusDir = "../status-go"
@@ -25,13 +25,13 @@ var (
 
 	// todoMode tracks if subsequent comment lines should be included in the last to-do's description
 	todoMode = false
-
 )
 
 type todo struct {
 	Filepath string
 	Description string
 	LineNumber int
+	RelatedFuncOrType string
 }
 
 func main() {
@@ -50,6 +50,11 @@ func processFilesInDir(dir string) error {
 	}
 
 	lineSplitter, err := regexp.Compile("\n")
+	if err != nil {
+		return err
+	}
+
+	et, err := NewEntityTracker()
 	if err != nil {
 		return err
 	}
@@ -84,6 +89,7 @@ func processFilesInDir(dir string) error {
 
 		lines := lineSplitter.Split(string(file), -1)
 		for i, l := range lines {
+			et.Track(l)
 
 			results := r.FindSubmatch([]byte(l))
 			if results == nil {
@@ -102,10 +108,8 @@ func processFilesInDir(dir string) error {
 
 				continue
 			}
-			found = append(found, todo{filepath, string(results[1]), i+1})
+			found = append(found, todo{filepath, string(results[1]), i+1, et.Current()})
 			todoMode = true
-
-			// TODO Working on getting subsequent lines of a todo
 		}
 	}
 
