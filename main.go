@@ -1,22 +1,30 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"regexp"
+	"unicode"
 
 	"github.com/davecgh/go-spew/spew"
 )
+
+// TODO implement dynamic comment token selection
+
+// TODO get line number of todo
+//  can be found by splitting the file by line break and regex find on each line.
+
+// TODO add line number to `todo` struct
+
+// TODO With line number find if todo is in a function or struct record the name of the function / struct in `todo{}`
 
 const (
 	statusDir = "../status-go"
 	ignore = statusDir + "/vendor"
 )
 
-// TODO implement dynamic comment token selection
-// TODO implement dynamic todo phrase search generation
-//  ie generate regex string from a slice of keywords
-
 var (
+	keywords = []string{"todo", "fixme"}
 	found []todo
 )
 
@@ -35,7 +43,7 @@ func main() {
 }
 
 func processFilesInDir(dir string) error {
-	r, err := regexp.Compile("//.*(([t,T][o,O][d,D][o,O]|[f,F][i,I][x,X][m,M][e,E])(.*))[\n,\r,\n\r,\r\n]")
+	r, err := regexp.Compile(buildRegexPattern(keywords))
 	if err != nil {
 		return err
 	}
@@ -74,7 +82,6 @@ func processFilesInDir(dir string) error {
 		}
 
 		for _, rst := range results {
-			spew.Dump(rst)
 			found = append(found, todo{filepath, string(rst[1])})
 		}
 
@@ -89,4 +96,28 @@ func isGoFile(name string) bool {
 	}
 	last := name[len(name)-3:]
 	return last == ".go"
+}
+
+func buildRegexPattern(keywords []string) string {
+	kwp := makeRegexKeywords(keywords)
+	return fmt.Sprintf("//.*((%s)(.*))[\n,\n,\n\n,\n]", kwp)
+}
+
+func makeRegexKeywords(keywords []string) string {
+	var out string
+
+	for i, kw := range keywords {
+		for _, r := range kw {
+			lower := unicode.ToLower(r)
+			upper := unicode.ToUpper(r)
+
+			out += fmt.Sprintf("[%s,%s]", string(lower), string(upper))
+		}
+
+		if i+1 < len(keywords) {
+			out += "|"
+		}
+	}
+
+	return out
 }
