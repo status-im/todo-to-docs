@@ -11,7 +11,7 @@ import (
 
 // TODO implement dynamic comment token selection
 
-// TODO add line number to `todo` struct
+// TODO get any additional lines from the todo
 
 // TODO With line number find if todo is in a function or struct record the name of the function / struct in `todo{}`
 
@@ -46,7 +46,7 @@ func processFilesInDir(dir string) error {
 		return err
 	}
 
-	lineSplitter, err := regexp.Compile("[\n]")
+	lineSplitter, err := regexp.Compile("\n")
 	if err != nil {
 		return err
 	}
@@ -82,15 +82,11 @@ func processFilesInDir(dir string) error {
 		lines := lineSplitter.Split(string(file), -1)
 		for i, l := range lines {
 
-			results := r.FindAllSubmatch([]byte(l), -1)
+			results := r.FindSubmatch([]byte(l))
 			if results == nil {
 				continue
 			}
-
-			for _, rst := range results {
-				found = append(found, todo{filepath, string(rst[1]), i+1})
-			}
-
+			found = append(found, todo{filepath, string(results[1]), i+1})
 		}
 	}
 
@@ -110,9 +106,7 @@ func buildRegexPattern(keywords []string) string {
 	return fmt.Sprintf("//.*((%s)(.*))", kwp)
 }
 
-func makeRegexKeywords(keywords []string) string {
-	var out string
-
+func makeRegexKeywords(keywords []string) (out string) {
 	for i, kw := range keywords {
 		for _, r := range kw {
 			lower := unicode.ToLower(r)
@@ -126,5 +120,5 @@ func makeRegexKeywords(keywords []string) string {
 		}
 	}
 
-	return out
+	return
 }
