@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 type node struct {
@@ -19,12 +21,15 @@ type TodoFinder struct {
 
 	// openTodo tracks if subsequent comment lines should be included in the last to-do's description
 	openTodo *todo
+
+	keywords []string
 }
 
 func NewTodoFinder() TodoFinder {
 	return TodoFinder{
 		FoundTable: []*todo{},
 		foundTree:  &node{Name: "root", Type: "dir"},
+		keywords: []string{"todo", "fixme"},
 	}
 }
 
@@ -34,7 +39,7 @@ func (tf *TodoFinder) AddTodo(t *todo) {
 }
 
 func (tf *TodoFinder) FindInDir(dir string) error {
-	r, err := regexp.Compile(buildRegexPattern(keywords))
+	r, err := regexp.Compile(tf.buildRegexPattern())
 	if err != nil {
 		return err
 	}
@@ -68,7 +73,7 @@ func (tf *TodoFinder) FindInDir(dir string) error {
 			}
 		}
 
-		if !isGoFile(f.Name()) {
+		if !tf.isGoFile(f.Name()) {
 			continue
 		}
 
@@ -145,11 +150,32 @@ func (n node) getTypeFromPath(path []string) string {
 	return "dir"
 }
 
-func trimPath(path []string) []string {
-	ignoreList := []string{"..", "status-go"}
-	if path[0] == ignoreList[0] && path[1] == ignoreList[1] {
-		path = path[2:]
+func  (tf TodoFinder) isGoFile(name string) bool {
+	if len(name) < 3 {
+		return false
+	}
+	last := name[len(name)-3:]
+	return last == ".go"
+}
+
+func (tf TodoFinder) buildRegexPattern() string {
+	kwp := tf.makeRegexKeywords()
+	return fmt.Sprintf("//.*((%s)(.*))", kwp)
+}
+
+func (tf TodoFinder) makeRegexKeywords() (out string) {
+	for i, kw := range tf.keywords {
+		for _, r := range kw {
+			lower := unicode.ToLower(r)
+			upper := unicode.ToUpper(r)
+
+			out += fmt.Sprintf("[%s,%s]", string(lower), string(upper))
+		}
+
+		if i+1 < len(tf.keywords) {
+			out += "|"
+		}
 	}
 
-	return path
+	return
 }
