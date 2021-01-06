@@ -27,7 +27,7 @@ type TodoFinder struct {
 func NewTodoFinder() (TodoFinder, error) {
 	tf := TodoFinder{
 		FoundTable: []*todo{},
-		foundTree:  &node{Name: "root", Type: "dir"},
+		foundTree:  &node{Name: "root", Type: DIR},
 		keywords: []string{"todo", "fixme"},
 	}
 

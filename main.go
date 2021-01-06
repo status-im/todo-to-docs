@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
 )
 
@@ -25,4 +26,5 @@ func main() {
 	}
 
 	spew.Dump(tf.FoundTable)
+	fmt.Println(tf.foundTree.String())
 }
