@@ -15,8 +15,12 @@ const (
 
 func main() {
 	tf := NewTodoFinder()
+	err := tf.Init()
+	if err != nil {
+		panic(err)
+	}
 
-	err := tf.FindInDir(statusDir)
+	err = tf.FindInDir(statusDir)
 	if err != nil {
 		panic(err)
 	}
