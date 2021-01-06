@@ -8,18 +8,13 @@ import (
 	"unicode"
 )
 
-type node struct {
-	Name  string
-	Type  string
-	Nodes []*node
-	Todos []*todo
-}
-
 type TodoFinder struct {
+	// regex related fields
 	entityTracker *entityTracker
 	todoRegex *regexp.Regexp
 	lineRegex *regexp.Regexp
 
+	// results store
 	FoundTable []*todo
 	foundTree  *node
 
@@ -123,39 +118,6 @@ func (tf *TodoFinder) FindInDir(dir string) error {
 	}
 
 	return nil
-}
-
-func (n *node) AddToTree(path []string, t *todo) {
-	if len(path) == 0 {
-		n.Todos = append(n.Todos, t)
-		return
-	}
-
-	var nn *node
-	for _, cn := range n.Nodes {
-		if cn.Name == path[0] {
-			nn = cn
-		}
-	}
-
-	if nn == nil {
-		nn = &node{
-			Name: path[0],
-			Type: n.getTypeFromPath(path),
-		}
-
-		n.Nodes = append(n.Nodes, nn)
-	}
-
-	nn.AddToTree(path[1:], t)
-}
-
-func (n node) getTypeFromPath(path []string) string {
-	if len(path) == 1 {
-		return "file"
-	}
-
-	return "dir"
 }
 
 func  (tf TodoFinder) isGoFile(name string) bool {

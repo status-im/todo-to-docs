@@ -25,5 +25,5 @@ func main() {
 		panic(err)
 	}
 
-	spew.Dump(tf.foundTree)
+	spew.Dump(tf.FoundTable)
 }
