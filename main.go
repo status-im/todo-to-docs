@@ -6,8 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 // TODO implement dynamic comment token selection, could maybe work similar to entityTracker{}
@@ -20,8 +18,7 @@ const (
 )
 
 var (
-	keywords = []string{"todo", "fixme"}
-	found    []todo
+	keywords   = []string{"todo", "fixme"}
 
 	// todoMode tracks if subsequent comment lines should be included in the last to-do's description
 	todoMode = false
@@ -32,6 +29,19 @@ type todo struct {
 	Description       string
 	LineNumber        int
 	RelatedFuncOrType string
+	filePathSlice	  []string
+}
+
+func (t *todo) Path() []string {
+	if t.filePathSlice != nil {
+		return t.filePathSlice
+	}
+
+	sp := strings.Split(t.Filepath, "/")
+	sp = trimPath(sp)
+	t.filePathSlice = sp
+
+	return t.filePathSlice
 }
 
 func main() {
@@ -39,8 +49,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	spew.Dump(found)
 }
 
 func processFilesInDir(dir string) error {
@@ -100,7 +108,7 @@ func processFilesInDir(dir string) error {
 				if todoMode {
 					l = strings.TrimSpace(l)
 					if l[:2] == "//" {
-						found[len(found)-1].Description += "\n" + l[2:]
+						//found[len(found)-1].Description += "\n" + l[2:]
 					} else {
 						todoMode = false
 					}
@@ -108,7 +116,14 @@ func processFilesInDir(dir string) error {
 
 				continue
 			}
-			found = append(found, todo{filepath, string(results[1]), i + 1, et.Current()})
+			td := &todo{
+				Filepath:          filepath,
+				Description:       string(results[1]),
+				LineNumber:        i + 1,
+				RelatedFuncOrType: et.Current(),
+			}
+			println(td)
+			//found = append(found, todo{filepath, string(results[1]), i + 1, et.Current()})
 			todoMode = true
 		}
 	}
