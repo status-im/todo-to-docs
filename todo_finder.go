@@ -8,19 +8,19 @@ type node struct {
 }
 
 type todoFinder struct {
-	foundTable map[string]*todo
-	foundTree *node
+	FoundTable []*todo
+	foundTree  *node
 }
 
-func NewTodoFinder() *todoFinder {
-	return &todoFinder{
-		foundTable: map[string]*todo{},
-		foundTree: &node{Name: "root", Type: "dir"},
+func NewTodoFinder() todoFinder {
+	return todoFinder{
+		FoundTable: []*todo{},
+		foundTree:  &node{Name: "root", Type: "dir"},
 	}
 }
 
 func (tf *todoFinder) AddTodo(t *todo) {
-	tf.foundTable[t.Filepath] = t
+	tf.FoundTable = append(tf.FoundTable, t)
 	tf.foundTree.AddToTree(t.Path(), t)
 }
 

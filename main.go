@@ -20,8 +20,8 @@ const (
 var (
 	keywords   = []string{"todo", "fixme"}
 
-	// todoMode tracks if subsequent comment lines should be included in the last to-do's description
-	todoMode = false
+	// openTodo tracks if subsequent comment lines should be included in the last to-do's description
+	openTodo *todo
 )
 
 type todo struct {
@@ -67,6 +67,8 @@ func processFilesInDir(dir string) error {
 		return err
 	}
 
+	tf := NewTodoFinder()
+
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
 		return err
@@ -102,15 +104,15 @@ func processFilesInDir(dir string) error {
 			results := r.FindSubmatch([]byte(l))
 			if results == nil {
 				if len(l) < 3 {
-					todoMode = false
+					openTodo = nil
 				}
 
-				if todoMode {
+				if openTodo != nil {
 					l = strings.TrimSpace(l)
 					if l[:2] == "//" {
-						//found[len(found)-1].Description += "\n" + l[2:]
+						openTodo.Description += "\n" + l[2:]
 					} else {
-						todoMode = false
+						openTodo = nil
 					}
 				}
 
@@ -122,9 +124,8 @@ func processFilesInDir(dir string) error {
 				LineNumber:        i + 1,
 				RelatedFuncOrType: et.Current(),
 			}
-			println(td)
-			//found = append(found, todo{filepath, string(results[1]), i + 1, et.Current()})
-			todoMode = true
+			tf.AddTodo(td)
+			openTodo = td
 		}
 	}
 
