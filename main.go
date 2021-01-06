@@ -14,8 +14,7 @@ const (
 )
 
 func main() {
-	tf := NewTodoFinder()
-	err := tf.Init()
+	tf, err := NewTodoFinder()
 	if err != nil {
 		panic(err)
 	}

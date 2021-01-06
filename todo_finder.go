@@ -24,15 +24,17 @@ type TodoFinder struct {
 	keywords []string
 }
 
-func NewTodoFinder() TodoFinder {
-	return TodoFinder{
+func NewTodoFinder() (TodoFinder, error) {
+	tf := TodoFinder{
 		FoundTable: []*todo{},
 		foundTree:  &node{Name: "root", Type: "dir"},
 		keywords: []string{"todo", "fixme"},
 	}
+
+	return tf, tf.init()
 }
 
-func (tf *TodoFinder) Init() (err error) {
+func (tf *TodoFinder) init() (err error) {
 	tf.todoRegex, err = regexp.Compile(tf.buildRegexPattern())
 	if err != nil {
 		return err
