@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"regexp"
-	"strings"
+	"github.com/davecgh/go-spew/spew"
 	"unicode"
 )
 
@@ -19,117 +17,17 @@ const (
 
 var (
 	keywords   = []string{"todo", "fixme"}
-
-	// openTodo tracks if subsequent comment lines should be included in the last to-do's description
-	openTodo *todo
 )
 
-type todo struct {
-	Filepath          string
-	Description       string
-	LineNumber        int
-	RelatedFuncOrType string
-	filePathSlice	  []string
-}
-
-func (t *todo) Path() []string {
-	if t.filePathSlice != nil {
-		return t.filePathSlice
-	}
-
-	sp := strings.Split(t.Filepath, "/")
-	sp = trimPath(sp)
-	t.filePathSlice = sp
-
-	return t.filePathSlice
-}
-
 func main() {
-	err := processFilesInDir(statusDir)
+	tf := NewTodoFinder()
+
+	err := tf.FindInDir(statusDir)
 	if err != nil {
 		panic(err)
 	}
-}
 
-func processFilesInDir(dir string) error {
-	r, err := regexp.Compile(buildRegexPattern(keywords))
-	if err != nil {
-		return err
-	}
-
-	lineSplitter, err := regexp.Compile("\n")
-	if err != nil {
-		return err
-	}
-
-	et, err := NewEntityTracker()
-	if err != nil {
-		return err
-	}
-
-	tf := NewTodoFinder()
-
-	files, err := ioutil.ReadDir(dir)
-	if err != nil {
-		return err
-	}
-
-	for _, f := range files {
-		filepath := dir + "/" + f.Name()
-
-		if filepath == ignore {
-			continue
-		}
-
-		if f.IsDir() {
-			err = processFilesInDir(filepath)
-			if err != nil {
-				return err
-			}
-		}
-
-		if !isGoFile(f.Name()) {
-			continue
-		}
-
-		file, err := ioutil.ReadFile(filepath)
-		if err != nil {
-			return err
-		}
-
-		lines := lineSplitter.Split(string(file), -1)
-		for i, l := range lines {
-			et.Track(l)
-
-			results := r.FindSubmatch([]byte(l))
-			if results == nil {
-				if len(l) < 3 {
-					openTodo = nil
-				}
-
-				if openTodo != nil {
-					l = strings.TrimSpace(l)
-					if l[:2] == "//" {
-						openTodo.Description += "\n" + l[2:]
-					} else {
-						openTodo = nil
-					}
-				}
-
-				continue
-			}
-			td := &todo{
-				Filepath:          filepath,
-				Description:       string(results[1]),
-				LineNumber:        i + 1,
-				RelatedFuncOrType: et.Current(),
-			}
-			tf.AddTodo(td)
-			openTodo = td
-		}
-	}
-
-	return nil
+	spew.Dump(tf.foundTree)
 }
 
 func isGoFile(name string) bool {
