@@ -11,8 +11,8 @@ import (
 type TodoFinder struct {
 	// regex related fields
 	entityTracker *entityTracker
-	todoRegex *regexp.Regexp
-	lineRegex *regexp.Regexp
+	todoRegex     *regexp.Regexp
+	lineRegex     *regexp.Regexp
 
 	// results store
 	FoundTable []*todo
@@ -28,7 +28,7 @@ func NewTodoFinder() (TodoFinder, error) {
 	tf := TodoFinder{
 		FoundTable: []*todo{},
 		foundTree:  &node{Name: "root", Type: DIR},
-		keywords: []string{"todo", "fixme"},
+		keywords:   []string{"todo", "fixme"},
 	}
 
 	return tf, tf.init()
@@ -122,7 +122,7 @@ func (tf *TodoFinder) FindInDir(dir string) error {
 	return nil
 }
 
-func  (tf TodoFinder) isGoFile(name string) bool {
+func (tf TodoFinder) isGoFile(name string) bool {
 	if len(name) < 3 {
 		return false
 	}

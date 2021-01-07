@@ -6,6 +6,10 @@ import "fmt"
 
 // TODO check if to-do is just above a function or struct, if so assume the to-do is about the function
 
+// TODO output to a file
+
+// TODO add execution params to the running of the application, allowing to set the path, keywords, ignore list, language, etc
+
 const (
 	statusDir = "../status-go"
 	ignore    = statusDir + "/vendor"

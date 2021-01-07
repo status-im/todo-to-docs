@@ -10,7 +10,7 @@ type todo struct {
 	Description       string
 	LineNumber        int
 	RelatedFuncOrType string
-	filePathSlice	  []string
+	filePathSlice     []string
 }
 
 func (t *todo) Path() []string {
@@ -42,7 +42,7 @@ func (t *todo) String() string {
 	l3 := "*Description*          : "
 
 	if t.RelatedFuncOrType != "" {
-		out += l1+ " `" + t.RelatedFuncOrType + "`" + "\n"
+		out += l1 + " `" + t.RelatedFuncOrType + "`" + "\n"
 	}
 
 	return out +

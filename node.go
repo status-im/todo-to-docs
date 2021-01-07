@@ -71,11 +71,11 @@ func (n node) toString(indent int) string {
 		switch c.Type {
 		case DIR:
 			out += idnt + "- 📁 " + c.Name + "\n"
-			out += c.toString(indent+1)
+			out += c.toString(indent + 1)
 		case FILE:
 			out += idnt + "- 📃 " + c.Name + "\n"
 			for _, t := range c.Todos {
-				todoIdnt := idnt+baseIdnt+baseIdnt
+				todoIdnt := idnt + baseIdnt + baseIdnt
 				ts := strings.ReplaceAll(t.String(), "\n", "\n"+todoIdnt)
 				out += idnt + baseIdnt + "- ⬜ Todo:\n" + todoIdnt + ts + "\n"
 			}
