@@ -1,6 +1,9 @@
 package main
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 type todo struct {
 	Filepath          string
@@ -29,4 +32,20 @@ func (t *todo) trimPath(path []string) []string {
 	}
 
 	return path
+}
+
+func (t *todo) String() string {
+	out := ""
+
+	l1 := "*Related func or type* :"
+	l2 := "*On line*              :"
+	l3 := "*Description*          : "
+
+	if t.RelatedFuncOrType != "" {
+		out += l1+ " `" + t.RelatedFuncOrType + "`" + "\n"
+	}
+
+	return out +
+		fmt.Sprintf("%s %d \n", l2, t.LineNumber) +
+		l3 + t.Description
 }

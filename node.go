@@ -1,5 +1,7 @@
 package main
 
+import "strings"
+
 type nodeType int
 
 const (
@@ -47,26 +49,38 @@ func (n node) getTypeFromPath(path []string) nodeType {
 	return DIR
 }
 
-func (n node) String() string {
-	return n.toString("", 0)
+func (n node) Markdown() string {
+	s := n.String()
+	return strings.ReplaceAll(s, "\n", "<br/>\n")
 }
 
-// TODO there is some kind of bug with this. Fix
-func (n node) toString(in string, indent int) string {
+func (n node) String() string {
+	return n.toString(0)
+}
+
+func (n node) toString(indent int) string {
+	out := ""
+	baseIdnt := "  "
+
 	idnt := ""
 	for i := 0; i < indent; i++ {
-		idnt += "  "
+		idnt += baseIdnt
 	}
 
 	for _, c := range n.Nodes {
 		switch c.Type {
 		case DIR:
-			in += idnt + "- " + c.Name + "\n"
-			in = n.toString(in, indent+1)
+			out += idnt + "- 📁 " + c.Name + "\n"
+			out += c.toString(indent+1)
 		case FILE:
-			in += idnt + "- " + c.Name + "\n"
+			out += idnt + "- 📃 " + c.Name + "\n"
+			for _, t := range c.Todos {
+				todoIdnt := idnt+baseIdnt+baseIdnt
+				ts := strings.ReplaceAll(t.String(), "\n", "\n"+todoIdnt)
+				out += idnt + baseIdnt + "- ⬜ Todo:\n" + todoIdnt + ts + "\n"
+			}
 		}
 	}
 
-	return in
+	return out
 }

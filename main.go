@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"github.com/davecgh/go-spew/spew"
-)
+import "fmt"
 
 // TODO implement dynamic comment token selection, could maybe work similar to entityTracker{}
 
@@ -25,6 +22,5 @@ func main() {
 		panic(err)
 	}
 
-	spew.Dump(tf.FoundTable)
-	fmt.Println(tf.foundTree.String())
+	fmt.Println(tf.foundTree.Markdown())
 }
