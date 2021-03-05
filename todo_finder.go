@@ -135,16 +135,17 @@ func (tf *TodoFinder) FindInDir(dir string) error {
 }
 
 func (tf TodoFinder) isValidFile(name string) bool {
-	valid := false
 	for _, ft := range tf.repo.FileTypes {
 		ftl := len(ft) + 1
 		if len(name) < ftl {
 			return false
 		}
-		last := name[ftl:]
-		valid = last == "."+ft
+		last := name[len(name)-ftl:]
+		if last == "."+ft {
+			return true
+		}
 	}
-	return valid
+	return false
 }
 
 func (tf TodoFinder) buildRegexPattern() string {
