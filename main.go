@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/hashicorp/go-getter"
+)
 
 // TODO add support for `status-react`
 
@@ -17,13 +20,37 @@ const (
 	ignore    = statusDir + "/vendor"
 )
 
+type Repo struct {
+	Dst string
+	Src string
+	FileTypes []string // To be used with (tf TodoFinder) isValidFile
+}
+
+var (
+	repos = []Repo{
+		{"./.dst/status-go", "github.com/status-im/status-go", []string{"go"}},
+		{"./.dst/status-react", "github.com/status-im/status-react", []string{"cljs"}},
+	}
+)
+
 func main() {
-	tf, err := NewTodoFinder()
+	repo := &Repo{
+		Dst:  ".dst/todos-to-docs",
+		Src: "github.com/status-im/todo-to-docs",
+		FileTypes: []string{"go"},
+	}
+
+	err := getter.Get(repo.Dst, repo.Src)
 	if err != nil {
 		panic(err)
 	}
 
-	err = tf.FindInDir(statusDir)
+	tf, err := NewTodoFinder(repo)
+	if err != nil {
+		panic(err)
+	}
+
+	err = tf.Find()
 	if err != nil {
 		panic(err)
 	}

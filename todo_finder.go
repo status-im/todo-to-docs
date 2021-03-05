@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"regexp"
@@ -22,13 +23,16 @@ type TodoFinder struct {
 	openTodo *todo
 
 	keywords []string
+
+	repo *Repo
 }
 
-func NewTodoFinder() (TodoFinder, error) {
+func NewTodoFinder(repo *Repo) (TodoFinder, error) {
 	tf := TodoFinder{
 		FoundTable: []*todo{},
 		foundTree:  &node{Name: "root", Type: DIR},
 		keywords:   []string{"todo", "fixme"},
+		repo: repo,
 	}
 
 	return tf, tf.init()
@@ -58,6 +62,14 @@ func (tf *TodoFinder) AddTodo(t *todo) {
 	tf.foundTree.AddToTree(t.Path(), t)
 }
 
+func (tf *TodoFinder) Find() error {
+	if tf.repo == nil {
+		return errors.New("repo not set")
+	}
+
+	return tf.FindInDir(tf.repo.Dst)
+}
+
 func (tf *TodoFinder) FindInDir(dir string) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
@@ -78,7 +90,7 @@ func (tf *TodoFinder) FindInDir(dir string) error {
 			}
 		}
 
-		if !tf.isGoFile(f.Name()) {
+		if !tf.isValidFile(f.Name()) {
 			continue
 		}
 
@@ -122,16 +134,23 @@ func (tf *TodoFinder) FindInDir(dir string) error {
 	return nil
 }
 
-func (tf TodoFinder) isGoFile(name string) bool {
-	if len(name) < 3 {
-		return false
+func (tf TodoFinder) isValidFile(name string) bool {
+	valid := false
+	for _, ft := range tf.repo.FileTypes {
+		ftl := len(ft) + 1
+		if len(name) < ftl {
+			return false
+		}
+		last := name[ftl:]
+		valid = last == "."+ft
 	}
-	last := name[len(name)-3:]
-	return last == ".go"
+	return valid
 }
 
 func (tf TodoFinder) buildRegexPattern() string {
 	kwp := tf.makeRegexKeywords()
+	// TODO add functionality for other types of commenting out
+	//  example ';;' or ';' for clojure, '#' and '/* */' blocks
 	return fmt.Sprintf("//.*((%s)(.*))", kwp)
 }
 
