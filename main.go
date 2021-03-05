@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+// TODO add support for `status-react`
+
 // TODO implement dynamic comment token selection, could maybe work similar to entityTracker{}
 
 // TODO check if to-do is just above a function or struct, if so assume the to-do is about the function
@@ -26,5 +28,5 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Println(tf.foundTree.Markdown())
+	fmt.Println(tf.foundTree)
 }

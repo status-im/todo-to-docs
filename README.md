@@ -22,6 +22,7 @@ todo-to-doc
 
 ## Sample Output
 
+...
 - 📁 params<br/>
   - 📃 config.go<br/>
     - ⬜ Todo:<br/>
@@ -40,5 +41,7 @@ todo-to-doc
       *On line*              : 401 <br/>
       *Description*          : TODO(adam): investigate if it's worth to keep the peer in the queue<br/>
        until the server confirms it is added and in the meanwhile only adjust its priority.<br/>
+
+...
 
 For a full sample output [see here](sample/sample.md)
